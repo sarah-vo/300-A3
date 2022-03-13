@@ -4,7 +4,7 @@
 #include "list.h"
 
 List* list_ready_high;
-List* list_ready_mid;
+List* list_ready_norm;
 List* list_ready_low;
 List* list_waiting_send;
 List* list_waiting_receive;
@@ -17,9 +17,9 @@ void pcb_initialize(){
         exit(FAILURE);
     }
 
-    list_ready_mid = List_create();
-    if(list_ready_mid = NULL){
-        perror("Failed to create a list for mid priority.\n");
+    list_ready_norm = List_create();
+    if(list_ready_norm = NULL){
+        perror("Failed to create a list for norm priority.\n");
         exit(FAILURE);
     }
 
