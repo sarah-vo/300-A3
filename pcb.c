@@ -3,14 +3,8 @@
 #include "pcb.h"
 #include "list.h"
 
-List* list_ready_high;
-List* list_ready_norm;
-List* list_ready_low;
-List* list_waiting_send;
-List* list_waiting_receive;
-
-
 void pcb_initialize(){
+    
     list_ready_high = List_create();
     if(list_ready_high = NULL){
         perror("Failed to create a list for high priority.\n");

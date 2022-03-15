@@ -3,7 +3,17 @@
 
 #define SUCCESS 0
 #define FAILURE -1
+#define MAX_LEN 40
 
+List* list_ready_high;
+List* list_ready_norm;
+List* list_ready_low;
+
+List* list_waiting_send;
+List* list_waiting_receive;
+
+PCB* pcb_init;
+PCB* pcb_curr;
 
 enum pcb_states {
     RUNNING,
@@ -11,8 +21,14 @@ enum pcb_states {
     BLOCKED
 };
 
-typedef struct pcb_s PCB;
-struct pcb_s{
+enum pcb_priorities{
+    HIGH,
+    NORM,
+    LOW
+};
+
+typedef struct pcb_str PCB;
+struct pcb_str{
     int pid;                    // a process ID (pid)
     int priority;               // priority (0, 1, or 2)
     enum pcb_states state;      // state of the process (running, ready, blocked)
