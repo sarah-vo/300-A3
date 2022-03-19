@@ -1,5 +1,6 @@
-#ifndef A3_PCB.H
-#define A3_PCB.H
+#ifndef A3_PCB_H
+#define A3_PCB_H
+#include "list.h"
 
 #define SUCCESS 0
 #define FAILURE -1
@@ -11,9 +12,6 @@ List* list_ready_low;
 
 List* list_waiting_send;
 List* list_waiting_receive;
-
-PCB* pcb_init;
-PCB* pcb_curr;
 
 enum pcb_states {
     RUNNING,
@@ -35,6 +33,11 @@ struct pcb_str{
     char* msg;                  // place to store any msgs another process "sends"s or "reply"s to this process
 };
 
+PCB* pcb_init;
+PCB* pcb_curr;  // currently executing process
+
 void pcb_initialize();
+
+void pcb_next();
 
 #endif //A3_PCB.H

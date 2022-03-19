@@ -3,68 +3,78 @@
 #include <stdbool.h>
 
 #include "pcb.h"
+#include "list.h"
 
+bool list_comparator(PCB* pItem, PCB* pComparisonArg){
+    return(pItem->pid = pComparisonArg->pid);
+}
 
-int create(int priority){
+int pcb_create(int priority){
 
 }
 
-int fork(){
+int pcb_fork(){
 
 }
 
-int kill(int pid){
+int pcb_kill(int pid){
 
 }
 
-void exit(){
+void pcb_exit(){
 
 }
 
-void quantum(){
+void pcb_quantum(){
 
 }
 
 /**
  * @brief 
  * 
- * @param pid (pid of process to send msg to)
+ * @param pid (pid of process to pcb_send msg to)
  * @param msg (null-terminated msg string, 40 char max)
  * @return int 
  */
-int send(int pid, char* msg){
+int pcb_send(int pid, char* msg){
+    if(pid == pcb_curr->pid){
+        pcb_curr->msg = msg;
+        pcb_curr->state = BLOCKED;
+
+        // List_insert(list_waiting_pcb_send, pcb_curr);
+        pcb_next();
+    }
+}
+
+int pcb_receive(){
 
 }
 
-int receive(){
+int pcb_reply(int pid, char* msg){
 
 }
 
-int reply(int pid, char* msg){
-    
-}
-
-int create_semaphore(int sid, int init){
+int pcb_create_semaphore(int sid, int init){
 
 }
 
-int P(int sid){
+int pcb_P(int sid){
 
 }
 
-int V(int sid){
+int pcb_V(int sid){
 
 }
 
-void procinfo(int pid){
+void pcb_procinfo(int pid){
 
 }
 
-void totalinfo(){
+void pcb_totalinfo(){
 
 }
 
-void commands(){
+void pcb_commands(){
     char command;
     switch(command){
         case 'C':
@@ -106,9 +116,13 @@ void commands(){
         case 'T':
         break;
 
-        default:
+        // default:
 
     }
+}
+
+void pcb_command_list(){
+
 }
 
 int main(){
@@ -146,7 +160,7 @@ int main(){
         }else if(command == 'T'){
 
         }else if(command == 'H'){
-            command_list();
+            pcb_command_list();
         }else if(command == 'X'){
             printf("Exiting the program...\n");
             printf("Goodbye!");
