@@ -8,7 +8,6 @@
 
 
 
-
 enum pcb_states {
     RUNNING,
     READY,
@@ -28,50 +27,42 @@ struct pcb_str{
     enum pcb_states state;      // state of the process (running, ready, blocked)
     char* msg;                  // place to store any msgs another process "sends"s or "reply"s to this process
 };
+
 typedef struct Semaphore_s Semaphore;
 struct Semaphore{
-    int id;
+    int sid;
     int val;
-
 };
 
-List* list_ready_high;
-List* list_ready_norm;
-List* list_ready_low;
+int pcb_initialize();
 
-List* list_waiting_send;
-List* list_waiting_receive;
+int pcb_create(int priority);
 
-PCB* pcb_init;
-PCB* pcb_curr;
+int pcb_fork();
 
-int init();
+int pcb_kill(int pid);
 
-int create(int priority);
+int pcb_exit();
 
-int fork();
+void pcb_terminate();
 
-int kill(int pid);
+void pcb_quantum();
 
-void terminate();
+int pcb_send(int pid, char* msg);
 
-void quantum();
+int pcb_receive();
 
-int send(int pid, char* msg);
+int pcb_reply(int pid, char* msg);
 
-int receive();
+int pcb_create_semaphore(int sid, int init);
 
-int reply(int pid, char* msg);
+int pcb_P(int sid);
 
-int create_semaphore(int sid, int init);
+int pcb_V(int sid);
 
-int P(int sid);
+void pcb_procinfo(int pid);
 
-int V(int sid);
-
-void procinfo(int pid);
-
-void totalinfo();
+void pcb_totalinfo();
 
 void pcb_next();
 

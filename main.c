@@ -5,11 +5,6 @@
 #include "pcb.h"
 #include "list.h"
 
-bool list_comparator(PCB* pItem, PCB* pComparisonArg){
-    return(pItem->pid = pComparisonArg->pid);
-}
-
-
 void commands(){
     char command;
     switch(command){
