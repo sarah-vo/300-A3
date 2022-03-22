@@ -36,6 +36,8 @@ struct Semaphore{
 
 int pcb_initialize();
 
+List* priorityList(int priority);
+
 int pcb_create(int priority);
 
 int pcb_fork();
