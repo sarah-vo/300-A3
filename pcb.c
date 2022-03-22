@@ -21,6 +21,35 @@ bool list_comparator(void* pcb, void* receiver){
     return(((PCB*)pcb)->pid == *((int*)receiver));
 }
 
+List* priorityList(int priority){
+    List* returnVal = NULL;
+    switch (priority){
+        case '0':
+            return list_ready_high;
+        case '1':
+            return list_ready_norm;
+        case '2':
+            return list_ready_low;
+        default:
+            printf("Failed to get list. (List* priorityList) \n");
+            exit(FAILURE);
+    }
+}
+
+char* priorityChar(int priority){
+    switch (priority){
+        case '0':
+            return "High";
+        case '1':
+            return "Normal";
+        case '2':
+            return "Low";
+        default:
+            return "Un-initialized";
+    }
+}
+
+
 PCB* pcb_search(int pid){
     COMPARATOR_FN pComparatorFn = &list_comparator;
     PCB* returnPCB = NULL;
@@ -59,33 +88,8 @@ void pcb_next() {
     pcb_curr->state = RUNNING;
 }
 
-char* priorityChar(int priority){
-    switch (priority){
-        case '0':
-            return "High";
-        case '1':
-            return "Normal";
-        case '2':
-            return "Low";
-        default:
-            return "Un-initialized";
-    }
-}
 
-List* priorityList(int priority){
-    List* returnVal = NULL;
-    switch (priority){
-        case '0':
-            return list_ready_high;
-        case '1':
-            return list_ready_norm;
-        case '2':
-            return list_ready_low;
-        default:
-            printf("Failed to get list. (List* priorityList) \n");
-            exit(FAILURE);
-    }
-}
+
 
 int pcb_initialize(){
     //initialize list
