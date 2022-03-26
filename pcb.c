@@ -69,8 +69,8 @@ List* priorityList(int priority){
 }
 
 int pcb_initialize(){
-    //initialize list
 
+    //initialize lists
     list_ready_high = List_create();
     if(list_ready_high == NULL){
         perror("Failed to create a list for high priority.\n");
@@ -99,6 +99,10 @@ int pcb_initialize(){
     if(list_waiting_receive == NULL){
         perror("Failed to create a list of processes waiting on receive.\n");
         exit(FAILURE);
+    }
+
+    for(int i = 0; i < SEM_MAX; i++){
+        semaphore[i] = NULL;
     }
 
     //initialize init PCB
@@ -382,15 +386,64 @@ int pcb_reply(int pid, char* msg){
 }
 
 int pcb_create_semaphore(int sid, int init){
+    if(sid < 0 || sid >= SEM_MAX){
+        printf("Invalid sid. The value sid will be from 0 to 4.\n");
+        return FAILURE;
+    }
 
+    if(semaphore[sid] == NULL){
+        semaphore[sid] = malloc(sizeof(Semaphore));
+        if(semaphore[sid] == NULL){
+            printf("Failed to allocate memory for semaphore of the given sid: %d\n", sid);
+            return FAILURE;
+        }
+        semaphore[sid]->val = init;
+        semaphore[sid]->plist = List_create();
+        if(semaphore[sid]->plist == NULL){
+            printf("Failed to create a list for processes waiting on semaphore (sid = %d)\n", sid);
+            return FAILURE;
+        }        
+    }else{
+        printf("Semaphore with the given sid (%d) already exists. Try again.\n", sid);
+        return FAILURE;
+    }
+    return SUCCESS;
 }
 
 int pcb_P(int sid){
+    // Check for the validity of sid
+    if(sid < 0 || sid >= SEM_MAX){
+        printf("Invalid sid. The value sid will be from 0 to 4.\n");
+        return FAILURE;
+    }
+
+    // Implementation based on the lecture note
+    semaphore[sid]->val--;
+    if(semaphore[sid]->val < 0){
+        List_prepend(semaphore[sid]->plist, pcb_curr);
+        pcb_next(); // switch the currently running process to the next process available
+    }
 
 }
 
 int pcb_V(int sid){
+    // Check for the validity of sid
+    if(sid < 0 || sid >= SEM_MAX){
+        printf("Invalid sid. The value sid will be from 0 to 4.\n");
+        return FAILURE;
+    }
 
+    PCB* pcb_wake;
+
+    semaphore[sid]->val++;
+    if(semaphore[sid]->val <= 0){
+        pcb_wake = List_trim(semaphore[sid]->plist);
+        if(pcb_wake == NULL){
+            printf("There is no process to unblock for the semaphore of sid: %d\n", sid);
+            return FAILURE;
+        }
+        List_prepend(priorityList(pcb_wake->priority), pcb_wake);   // wake up a process in pList and add it to the correct ready list
+    }
 }
 
 void pcb_procinfo(int pid){
