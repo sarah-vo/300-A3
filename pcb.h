@@ -5,6 +5,7 @@
 #define SUCCESS 0
 #define FAILURE -1
 #define MAX_LEN 40
+#define SEM_MAX 5
 
 
 
@@ -36,14 +37,13 @@ struct pcb_str{
 };
 
 typedef struct Semaphore_s Semaphore;
-struct Semaphore{
-    int sid;
-    int val;
+
+struct Semaphore_s{
+    int val;            // integer representing a value of semaphore
+    List* plist;     // a list of processes waiting for the semaphore
 };
 
 int pcb_initialize();
-
-List* priorityList(int priority);
 
 int pcb_create(int priority);
 
