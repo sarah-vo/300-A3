@@ -7,7 +7,7 @@
 #define MAX_LEN 40
 #define SEM_MAX 5
 
-
+#define EXIT_SIGNAL 482
 
 enum pcb_states {
     RUNNING,

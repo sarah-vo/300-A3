@@ -66,6 +66,7 @@ int main(){
     //except for exit and help, all command should run pcb_totalinfo() after executing
     while(true){
         printf("Enter a command: \n");
+        fflush(stdin);
         scanf("%c", &command);
 
         if(command == 'C' || command == 'c'){ //create
@@ -96,8 +97,10 @@ int main(){
 
 
         }else if(command == 'E'){//exit
-            pcb_exit();
-            break;
+            int exitCode = pcb_exit();
+            if(exitCode == EXIT_SIGNAL){
+                break;
+            }
 
         }else if(command == 'Q'){
             pcb_quantum();

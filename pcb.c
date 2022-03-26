@@ -194,29 +194,40 @@ int pcb_kill(int pid){
     //search for the PCB corresponding to the pid, remove it from the list and free that pcb's memory
     COMPARATOR_FN pComparatorFn = &list_comparator;
     PCB* PCB_kill = pcb_search(pid);
+    if(pid == 0){
+        printf("Cannot kill initial process.\n");
+    }
     if(PCB_kill == NULL){
         printf("Process with PID #%d cannot be found.\n" ,pid);
         return FAILURE;
     }
     List* listItemRemove = priorityList(PCB_kill->priority);
+    List_first(listItemRemove);
     List_search(listItemRemove, pComparatorFn, &pid);
     List_remove(listItemRemove);
     free(PCB_kill);
-    //TODO is this necessary (going to next PCB)
+    printf("PCB PID# %d removed.\n", pid);
     pcb_next();
-    int pid_next = pcb_curr->pid;
-    printf("PCB PID# %d removed. Current PCB is PID# %d", pid, pid_next);
+    printf("The current active process: PID# %d, priority: %s(%d).\n",
+           pcb_curr->pid, priorityChar(pcb_curr->pid), pcb_curr->priority);
     return SUCCESS;
 }
 
-int pcb_exit(){
-
+int pcb_exit() {
+    if(pcb_curr == pcb_init){
+        free(pcb_init);
+        printf("Killing the initial process. Exiting the simulation...\n");
+        return EXIT_SIGNAL;
+    }
+    free(pcb_curr);
+    pcb_next();
+    printf("Current process killed. The current running process is: PID #%d\n",pcb_curr->pid);
+    return SUCCESS;
 }
 
 void list_pcb_free(void* pcb){
     free((PCB*)pcb);
 }
-//TODO is this exit()?
 void pcb_terminate(){
     FREE_FN pFreeFn = &list_pcb_free;
     List_free(list_ready_high, pFreeFn);
@@ -527,7 +538,7 @@ void pcb_procinfo(int pid){
 
 }
 
-totalinfo_helper(List* list, int priority){
+void totalinfo_helper(List* list, int priority){
     char* priorityCharOutput = priorityChar(priority);
     PCB* pcb_temp = List_first(list);
     printf("Processes with priority %s: ", priorityCharOutput);
@@ -540,8 +551,13 @@ totalinfo_helper(List* list, int priority){
 
 void pcb_totalinfo(){
     printf("\nTotal information about the system:\n");
-    printf("The current active process: PID# %d, priority: %s(%d).\n",
-           pcb_curr->pid, priorityChar(pcb_curr->pid), pcb_curr->priority);
+    if(pcb_curr != pcb_init){
+        printf("The current active process: PID# %d, priority: %s(%d).\n",
+               pcb_curr->pid, priorityChar(pcb_curr->pid), pcb_curr->priority);
+    }
+    else{
+        printf("The initial process is currently running.\n");
+    }
     totalinfo_helper(list_ready_high, 0);
     totalinfo_helper(list_ready_norm, 1);
     totalinfo_helper(list_ready_low, 2);
