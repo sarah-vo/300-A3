@@ -64,20 +64,23 @@ int main(){
     pcb_initialize();
 
     //except for exit and help, all command should run pcb_totalinfo() after executing
-    while(run){
+    while(true){
         printf("Enter a command: \n");
         scanf("%c", &command);
 
-        if(command == 'C'){ //create
-            printf("Type in the PCB priority: ");
-            int priority;
-            scanf("%d", &priority);
-            if(priority != (0 || 1 || 2)){
-                printf("\nPriority value must be either 0, 1, or 2. Please try again.\n");
+        if(command == 'C' || command == 'c'){ //create
+            printf("Type in the PCB input: ");
+            char input;
+            char* endptr;
+            //fflush(stdin);
+            scanf("%d",&input);
+            int priority = (int) input;
+            if(priority == 0 || priority == 1 || priority == 2){
+                pcb_create(priority);
+                //pcb_totalinfo();
             }
             else{
-                pcb_create(priority);
-                pcb_totalinfo();
+                printf("\nPriority value must be either 0, 1, or 2. Please try again.\n");
             }
         }
         else if(command == 'F'){ //fork
@@ -86,19 +89,17 @@ int main(){
         }
         else if(command == 'K'){ //kill
             printf("Type in the PID#: ");
-            int PID;
-            scanf("%d", &PID);
-            if(PID != (0 || 1 || 2)){
-                printf("\nPriority value must be either 0, 1, or 2. Please try again.\n");
-            }
-            else{
-                pcb_kill(PID);
-                pcb_totalinfo();
-            }
+            char input;
+            //fflush(stdin);
+            scanf("%s", &input);
+            int PID = atoi(&input);
+            pcb_kill(PID);
+            pcb_totalinfo();
+
 
         }else if(command == 'E'){//exit
             pcb_exit();
-            run = false;
+            break;
 
         }else if(command == 'Q'){
             pcb_quantum();
@@ -131,8 +132,8 @@ int main(){
         }else if(command == 'H'){
             pcb_command_list();
         }else{
-            printf("Invalid command: please enter the correct command.\n");
-            printf("Enter 'H' for help.\n");
+//            printf("Invalid command: please enter the correct command.\n");
+//            printf("Enter 'H' for help.\n");
         }
     }
    

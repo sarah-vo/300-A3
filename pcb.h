@@ -14,6 +14,12 @@ enum pcb_states {
     BLOCKED
 };
 
+enum wait_receive {
+    SEND,
+    RECEIVE,
+    NONE
+};
+
 enum pcb_priorities{
     HIGH,
     NORM,
@@ -25,6 +31,7 @@ struct pcb_str{
     int pid;                    // a process ID (pid)
     int priority;               // priority (0, 1, or 2)
     enum pcb_states state;      // state of the process (running, ready, blocked)
+    enum wait_receive waitReceiveState;
     char* msg;                  // place to store any msgs another process "sends"s or "reply"s to this process
 };
 
@@ -48,7 +55,7 @@ int pcb_exit();
 
 void pcb_terminate();
 
-void pcb_quantum();
+int pcb_quantum();
 
 int pcb_send(int pid, char* msg);
 

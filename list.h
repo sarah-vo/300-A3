@@ -31,8 +31,6 @@ struct List_s{
     enum ListOutOfBounds lastOutOfBoundsReason;
 };
 
-
-
 // Maximum number of unique lists the system can support
 // (You may modify for your needs)
 #define LIST_MAX_NUM_HEADS 100

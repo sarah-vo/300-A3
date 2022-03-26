@@ -17,18 +17,16 @@ PCB* pcb_curr = NULL;
 int totalPID = 0;
 Semaphore* semaphore[5];
 
-bool list_comparator(void* pcb, void* receiver){
-    return(((PCB*)pcb)->pid == *((int*)receiver));
-}
+
 
 List* priorityList(int priority){
     List* returnVal = NULL;
     switch (priority){
-        case '0':
+        case 0:
             return list_ready_high;
-        case '1':
+        case 1:
             return list_ready_norm;
-        case '2':
+        case 2:
             return list_ready_low;
         default:
             printf("Failed to get list. (List* priorityList) \n");
@@ -38,33 +36,34 @@ List* priorityList(int priority){
 
 char* priorityChar(int priority){
     switch (priority){
-        case '0':
+        case 0:
             return "High";
-        case '1':
+        case 1:
             return "Normal";
-        case '2':
+        case 2:
             return "Low";
         default:
             return "Un-initialized";
     }
 }
 
-
+bool list_comparator(void* pcb, void* receiver){
+    return(((PCB*)pcb)->pid == *((int*)receiver));
+}
 PCB* pcb_search(int pid){
     COMPARATOR_FN pComparatorFn = &list_comparator;
     PCB* returnPCB = NULL;
     //if List_search fails, the pointer would point NULL
     while(returnPCB == NULL){
-        List_search(priorityList(0), pComparatorFn, &pid);
+        returnPCB = List_search(priorityList(0), pComparatorFn, &pid);
             returnPCB = List_curr(priorityList(0));
-        List_search(priorityList(1), pComparatorFn, &pid);
+        returnPCB = List_search(priorityList(1), pComparatorFn, &pid);
             returnPCB = List_curr(priorityList(1));
-        List_search(priorityList(2), pComparatorFn, &pid);
+        returnPCB = List_search(priorityList(2), pComparatorFn, &pid);
             returnPCB = List_curr(priorityList(2));
-        List_search(list_waiting_receive, pComparatorFn, &pid);
+        returnPCB = List_search(list_waiting_receive, pComparatorFn, &pid);
             returnPCB = List_curr(list_waiting_receive);
-        List_search(list_waiting_send, pComparatorFn, &pid);
-            returnPCB = List_curr(list_waiting_receive);
+        returnPCB = List_search(list_waiting_send, pComparatorFn, &pid);
     }
     return returnPCB;
 }
@@ -114,7 +113,7 @@ int pcb_initialize(){
     pcb_init = malloc(sizeof(PCB));
     pcb_init->state = RUNNING;
     pcb_init->pid = 0;
-    pcb_init->priority = HIGH;
+    pcb_init->priority = 0;
     pcb_init->msg = NULL;
     totalPID++;
     pcb_curr = pcb_init;
@@ -135,27 +134,28 @@ int pcb_create(int priority){
     newPCB->priority = priority;
     newPCB->pid = totalPID;
     newPCB->state = READY;
+    newPCB->waitReceiveState = NONE;
 
     totalPID++;
 
     //check priority number
-    bool appendSuccess;
+    bool appendSuccess = false;
     switch (priority) {
-        case '0': //high priority
-            appendSuccess = List_prepend(list_ready_high, newPCB) == 0;
+        case 0: //high priority
+            appendSuccess = (List_prepend(list_ready_high, (void*)newPCB) == 0);
             break;
-        case '1': //high priority
-            appendSuccess = List_prepend(list_ready_norm, newPCB) == 0;
+        case 1: //normal priority
+            appendSuccess = (List_prepend(list_ready_norm, (void*)newPCB) == 0);
             break;
-        case '2': //high priority
-            appendSuccess = List_prepend(list_ready_low, newPCB) == 0;
+        case 2: //low priority
+            appendSuccess = (List_prepend(list_ready_low, (void*)newPCB) == 0);
             break;
     }
     if(!appendSuccess){
         printf("Append new process to list failed!\n");
         return(FAILURE);
     }
-    printf("Process created successfully. The PID is: %d with %s\n", newPCB->pid, priorityChar(newPCB->priority));
+    printf("Process created successfully. Its PID is: %d with %s\n", newPCB->pid, priorityChar(newPCB->priority));
     return SUCCESS;
 }
 
@@ -170,9 +170,11 @@ int pcb_fork(){
     }
     PCB *newProcess = malloc(sizeof(PCB));
     memcpy(newProcess, pcb_curr, sizeof(PCB));
+    newProcess->pid = totalPID;
+    totalPID++;
     List* list = priorityList(pcb_curr->priority);
     List_prepend(list, newProcess);
-    printf("Process forked successfully. The new PID is: %d with %s\n", newProcess->pid, priorityChar(newProcess->priority));
+    printf("Process forked successfully. The new PID is: %d with priority: %s (%d)\n", newProcess->pid, priorityChar(newProcess->priority), newProcess->priority);
     return SUCCESS;
 }
 
@@ -215,17 +217,21 @@ void pcb_terminate(){
     List_free(list_waiting_receive, pFreeFn);
 }
 
-void pcb_quantum(){
-    if(pcb_curr == pcb_init){
-        printf("Cannot quantum initital PCB.\n");
-        return FAILURE;
-    }
+int pcb_quantum(){
+
     int currPID = pcb_curr->pid;
     int currPriority = pcb_curr->priority;
-    List_prepend(priorityList(currPriority), pcb_curr);
     pcb_next();
     int nextPID = pcb_curr->pid;
-    printf("PCB #%d is put back into %c. The current active process is PCB #%d", currPID, priorityChar(currPriority), nextPID);
+    if(currPID == 0){
+        printf("Exiting from initial process. The current active process is PCB #%d", nextPID);
+
+    }
+    else{
+        List_prepend(priorityList(currPriority), pcb_curr);
+        printf("PCB #%d is put back into %s. The current active process is PCB #%d", currPID, priorityChar(currPriority), nextPID);
+
+    }
     return SUCCESS;
 
 
@@ -431,10 +437,72 @@ int pcb_V(int sid){
 
 }
 
+char* stateChar(enum pcb_states states){
+    switch(states){
+        case RUNNING:
+            return "Running";
+        case BLOCKED:
+            return "Blocked";
+        case READY:
+            return "Ready";
+        default:
+            perror("Error in parsing state in character form!");
+            exit(FAILURE);
+    }
+}
+
 void pcb_procinfo(int pid){
+    PCB* temp = pcb_search(pid);
+    printf("\nProcess PID#%d is in state: '%s' and is in queue %s(%d).",
+           temp->pid, stateChar(temp->state), priorityChar(temp->priority), temp->priority);
+    if(temp->waitReceiveState == NONE){
+        printf("It is not in a wait/receive state.\n");
+    }
+    if(temp->waitReceiveState == WAIT){
+        printf("It is in WAIT state.\n");
+    }
+    if(temp->waitReceiveState == RECEIVE){
+        printf("It is in RECEIVE state.\n");
+    }
+
 
 }
 
-void pcb_totalinfo(){
+totalinfo_helper(List* list, int priority){
+    char* priorityCharOutput = priorityChar(priority);
+    PCB* pcb_temp = List_first(list);
+    printf("Processes with priority %s: ", priorityCharOutput);
+    for(int i = 0; pcb_temp != NULL; i++){
+    printf("%d ", pcb_temp->pid);
+    pcb_temp = List_next(list);
+}
+    printf(".\n");
+}
 
+void pcb_totalinfo(){
+    printf("\nTotal information about the system:\n");
+    printf("The current active process: PID# %d, priority: %s(%d).\n",
+           pcb_curr->pid, priorityChar(pcb_curr->pid), pcb_curr->priority);
+    totalinfo_helper(list_ready_high, 0);
+    totalinfo_helper(list_ready_norm, 1);
+    totalinfo_helper(list_ready_low, 2);
+
+
+    PCB* pcb_waitingSend = List_first(list_waiting_send);
+    printf("Processes in waiting send list: ");
+    for(int i = 0; pcb_waitingSend != NULL; i++){
+        pcb_waitingSend = List_next(list_waiting_send);
+        printf("%d ", pcb_waitingSend->pid);
+    }
+    printf(".\n");
+
+    PCB* pcb_waitingReceive = List_first(list_waiting_receive);
+    printf("Processes in waiting send list: ");
+    for(int i = 0; pcb_waitingReceive != NULL; i++){
+        pcb_waitingReceive = List_next(list_waiting_receive);
+        printf("%d ", pcb_waitingReceive->pid);
+    }
+    printf(".\n");
+
+    //need to add semaphore
 }
