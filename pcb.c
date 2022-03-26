@@ -564,4 +564,11 @@ void pcb_totalinfo(){
     printf(".\n");
 
     //need to add semaphore
+    for (int i = 0; i < SEM_MAX; i++){
+        PCB* sem_blocked = List_first(semaphore[i]->plist);
+        while(sem_blocked != NULL){
+            printf("Process (pid: %d) is currently blocked by semaphore (sid: %d)\n", sem_blocked->pid, i);
+            sem_blocked = List_next(semaphore[i]->plist);
+        }
+    }
 }
