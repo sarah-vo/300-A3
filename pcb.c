@@ -54,18 +54,25 @@ PCB* pcb_search(int pid){
     COMPARATOR_FN pComparatorFn = &list_comparator;
     PCB* returnPCB = NULL;
     //if List_search fails, the pointer would point NULL
-    while(returnPCB == NULL){
-        returnPCB = List_search(priorityList(0), pComparatorFn, &pid);
-            returnPCB = List_curr(priorityList(0));
-        returnPCB = List_search(priorityList(1), pComparatorFn, &pid);
-            returnPCB = List_curr(priorityList(1));
-        returnPCB = List_search(priorityList(2), pComparatorFn, &pid);
-            returnPCB = List_curr(priorityList(2));
-        returnPCB = List_search(list_waiting_receive, pComparatorFn, &pid);
-            returnPCB = List_curr(list_waiting_receive);
-        returnPCB = List_search(list_waiting_send, pComparatorFn, &pid);
-    }
+    List_first(priorityList(0));
+    List_first(priorityList(1));
+    List_first(priorityList(2));
+    List_first(list_waiting_send);
+    List_first(list_waiting_receive);
+    returnPCB = List_search(priorityList(0), pComparatorFn, &pid);
+    if(returnPCB != NULL) return returnPCB;
+    returnPCB = List_search(priorityList(1), pComparatorFn, &pid);
+    if(returnPCB != NULL) return returnPCB;
+    returnPCB = List_search(priorityList(2), pComparatorFn, &pid);
+    if(returnPCB != NULL) return returnPCB;
+    returnPCB = List_search(list_waiting_receive, pComparatorFn, &pid);
+    if(returnPCB != NULL) return returnPCB;
+    returnPCB = List_search(list_waiting_send, pComparatorFn, &pid);
+    if(returnPCB != NULL) return returnPCB;
+    //if search cannot find List then NULL will be returned
+    //TODO Aerin check to see if this change interferes with send/receive
     return returnPCB;
+
 }
 
 // wake up the next blocked process, according to its priority, and set it as the curr_pcb
@@ -187,14 +194,11 @@ int pcb_kill(int pid){
     //search for the PCB corresponding to the pid, remove it from the list and free that pcb's memory
     COMPARATOR_FN pComparatorFn = &list_comparator;
     PCB* PCB_kill = pcb_search(pid);
-    if(pcb_curr == pcb_init){
-        return pcb_exit();
-    }
-    if(pcb_curr == NULL){
-        printf("Error: Current PCB is null!\n");
+    if(PCB_kill == NULL){
+        printf("Process with PID #%d cannot be found.\n" ,pid);
         return FAILURE;
     }
-    List* listItemRemove =priorityList(PCB_kill->priority);
+    List* listItemRemove = priorityList(PCB_kill->priority);
     List_search(listItemRemove, pComparatorFn, &pid);
     List_remove(listItemRemove);
     free(PCB_kill);
@@ -226,6 +230,7 @@ int pcb_quantum(){
 
     int currPID = pcb_curr->pid;
     int currPriority = pcb_curr->priority;
+    PCB* preQuantumPCB = pcb_curr;
     pcb_next();
     int nextPID = pcb_curr->pid;
     if(currPID == 0){
@@ -233,7 +238,7 @@ int pcb_quantum(){
 
     }
     else{
-        List_prepend(priorityList(currPriority), pcb_curr);
+        List_prepend(priorityList(currPriority), preQuantumPCB);
         printf("PCB #%d is put back into %s. The current active process is PCB #%d", currPID, priorityChar(currPriority), nextPID);
 
     }
@@ -512,8 +517,8 @@ void pcb_procinfo(int pid){
     if(temp->waitReceiveState == NONE){
         printf("It is not in a wait/receive state.\n");
     }
-    if(temp->waitReceiveState == WAIT){
-        printf("It is in WAIT state.\n");
+    if(temp->waitReceiveState == SEND){
+        printf("It is in SEND state.\n");
     }
     if(temp->waitReceiveState == RECEIVE){
         printf("It is in RECEIVE state.\n");

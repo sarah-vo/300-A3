@@ -85,7 +85,6 @@ int main(){
         }
         else if(command == 'F'){ //fork
             pcb_fork();
-            pcb_totalinfo();    
         }
         else if(command == 'K'){ //kill
             printf("Type in the PID#: ");
@@ -94,7 +93,6 @@ int main(){
             scanf("%s", &input);
             int PID = atoi(&input);
             pcb_kill(PID);
-            pcb_totalinfo();
 
 
         }else if(command == 'E'){//exit
@@ -103,14 +101,20 @@ int main(){
 
         }else if(command == 'Q'){
             pcb_quantum();
-            pcb_totalinfo();
 
         }else if(command == 'S'){
-            pcb_totalinfo();
-
+            printf("Type in the PID#: ");
+            char input;
+            //fflush(stdin);
+            scanf("%s", &input);
+            int PID = atoi(&input);
+            printf("\n Type in the message: ");
+            char *msg = NULL;
+            scanf("%s", msg);
+            pcb_send(PID, msg);
 
         }else if(command == 'R'){
-            pcb_totalinfo();
+            pcb_receive();
 
         }else if(command == 'Y'){
             pcb_totalinfo();
