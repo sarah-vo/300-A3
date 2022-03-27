@@ -550,7 +550,7 @@ void pcb_procinfo(int pid){
 void totalinfo_helper(List* list, int priority){
     char* priorityCharOutput = priorityChar(priority);
     PCB* pcb_temp = List_first(list);
-    printf("Processes with priority %s: ", priorityCharOutput);
+    printf("Processes with priority %s:", priorityCharOutput);
     for(int i = 0; pcb_temp != NULL; i++){
     printf("%d ", pcb_temp->pid);
     pcb_temp = List_next(list);
@@ -571,6 +571,8 @@ void pcb_totalinfo(){
     else{
         printf("The initial process is currently running.\n");
     }
+
+    printf("\nFrom lowest -> highest:\n");
     totalinfo_helper(list_ready_high, 0);
     totalinfo_helper(list_ready_norm, 1);
     totalinfo_helper(list_ready_low, 2);
