@@ -50,6 +50,7 @@ char* priorityChar(int priority){
 bool list_comparator(void* pcb, void* receiver){
     return(((PCB*)pcb)->pid == *((int*)receiver));
 }
+
 PCB* pcb_search(int pid){
     COMPARATOR_FN pComparatorFn = &list_comparator;
     PCB* returnPCB = NULL;
@@ -94,6 +95,11 @@ void pcb_next() {
     pcb_curr->state = RUNNING;
 }
 
+/**
+ * @brief Initialize all the queues and sempahore
+ * 
+ * @return int 
+ */
 int pcb_initialize(){
     //initialize list
 
@@ -132,6 +138,12 @@ int pcb_initialize(){
 
 }
 
+/**
+ * @brief create a new process with a given priority, then put the process into the correct ready_queue
+ * 
+ * @param priority 
+ * @return int 
+ */
 int pcb_create(int priority){
     //if totalPID is 0, initialize
     if(totalPID == 0){
@@ -203,6 +215,12 @@ int pcb_fork(){
     return SUCCESS;
 }
 
+/**
+ * @brief Kill the process of the given pid
+ * 
+ * @param pid 
+ * @return int 
+ */
 int pcb_kill(int pid){
     //search for the PCB corresponding to the pid, remove it from the list and free that pcb's memory
     COMPARATOR_FN pComparatorFn = &list_comparator;
@@ -240,6 +258,11 @@ int pcb_kill(int pid){
     return EXIT_SUCCESS;
 }
 
+/**
+ * @brief Kill the currently running process
+ * 
+ * @return int 
+ */
 int pcb_exit() {
     int curr_pid = pcb_curr->pid;
     if(pcb_curr == pcb_init){
@@ -259,6 +282,7 @@ int pcb_exit() {
 void list_pcb_free(void* pcb){
     free((PCB*)pcb);
 }
+
 void pcb_terminate(){
     FREE_FN pFreeFn = &list_pcb_free;
     List_free(list_ready_high, pFreeFn);
@@ -286,8 +310,6 @@ int pcb_quantum(){
     }
     return SUCCESS;
 }
-
-
 
 /**
  * @brief
@@ -342,6 +364,11 @@ int pcb_send(int pid, char* msg){
 
 }
 
+/**
+ * @brief Check if the currently running process has received a message
+ * 
+ * @return int 
+ */
 int pcb_receive(){
     if(pcb_curr == pcb_init){
         printf("Initial PCB cannot receive messages.\n");
@@ -364,7 +391,13 @@ int pcb_receive(){
     return SUCCESS;
 }
 
-
+/**
+ * @brief Create a new semaphore 
+ * 
+ * @param sid 
+ * @param init 
+ * @return int 
+ */
 int pcb_create_semaphore(int sid, int init){
     if(sid < 0 || sid >= SEM_MAX){
         printf("Invalid sid. The value sid will be from 0 to 4.\n");
@@ -380,6 +413,7 @@ int pcb_create_semaphore(int sid, int init){
 
         semaphore[sid]->val = init;
         semaphore[sid]->plist = List_create();
+        printf("A new semaphore (sid: #%d) with a value: %d has been created.\n", sid, init);
     }else{
         printf("Semaphore with the given sid (%d) already exists. Try again.\n", sid);
         return FAILURE;
@@ -387,6 +421,12 @@ int pcb_create_semaphore(int sid, int init){
     return SUCCESS;
 }
 
+/**
+ * @brief Increment a semaphore value by 1 and block the currently running process if the value < 0
+ * 
+ * @param sid 
+ * @return int 
+ */
 int pcb_P(int sid){
     // Check for the validity of sid
     if(sid < 0 || sid >= SEM_MAX){
@@ -397,12 +437,21 @@ int pcb_P(int sid){
     // Implementation based on the lecture note
     semaphore[sid]->val--;
     if(semaphore[sid]->val < 0){
+        printf("The value of semaphore (sid: %d) has a negative value: %d\n", sid, semaphore[sid]->val);
+        printf("The currently running process (pid: %d) will now be blocked.\n", pcb_curr->pid);
         List_prepend(semaphore[sid]->plist, pcb_curr);
         pcb_next(); // switch the currently running process to the next process available
+        printf("The new executing process (pid: #%d) has been set.\n", pcb_curr->pid);
     }
 
 }
 
+/**
+ * @brief Decrement the semaphore value by 1 and free a blocked process if value <= 0
+ * 
+ * @param sid 
+ * @return int 
+ */
 int pcb_V(int sid){
     // Check for the validity of sid
     if(sid < 0 || sid >= SEM_MAX){
@@ -420,6 +469,8 @@ int pcb_V(int sid){
             return FAILURE;
         }
         List_prepend(priorityList(pcb_wake->priority), pcb_wake);   // wake up a process in pList and add it to the correct ready list
+        printf("The semaphore (sid: #%d) has a value of %d which is <= 0\n", sid, semaphore[sid]->val);
+        printf("A process blocked by the semaphore (pid: #d, priority: %s) will be unblocked and be placed in the ready queue.\n", pcb_curr->pid, priorityChar(pcb_curr->priority));
     }
 }
 
@@ -437,6 +488,11 @@ char* stateChar(enum pcb_states states){
     }
 }
 
+/**
+ * @brief Display the information of the process of the given pid
+ * 
+ * @param pid 
+ */
 void pcb_procinfo(int pid){
     PCB* temp = pcb_search(pid);
     printf("\nProcess PID#%d is in state: '%s' and is in queue %s(%d).\n",
@@ -465,6 +521,10 @@ void totalinfo_helper(List* list, int priority){
     printf(".\n");
 }
 
+/**
+ * @brief Display the current status of the system
+ * 
+ */
 void pcb_totalinfo(){
     printf("\nTotal information about the system:\n");
     if(pcb_curr != pcb_init){
