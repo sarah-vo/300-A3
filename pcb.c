@@ -14,6 +14,7 @@ PCB* pcb_init;
 PCB* pcb_curr;
 
 int totalPID = 0;
+int total_proc = 0;
 Semaphore* semaphore[5];
 
 
@@ -70,7 +71,6 @@ PCB* pcb_search(int pid){
     returnPCB = List_search(list_waiting_send, pComparatorFn, &pid);
     if(returnPCB != NULL) return returnPCB;
     //if search cannot find List then NULL will be returned
-    //TODO Aerin check to see if this change interferes with send/receive
     return returnPCB;
 
 }
@@ -115,9 +115,6 @@ int pcb_initialize(){
 
     for(int i = 0; i < SEM_MAX; i++){
         semaphore[i] = NULL;
-        semaphore[i] = (Semaphore*) malloc(sizeof(Semaphore));
-        semaphore[i]->plist = List_create();
-
     }
 
     //initialize init PCB
@@ -148,8 +145,18 @@ int pcb_create(int priority){
     newPCB->waitReceiveState = NONE;
 
     totalPID++;
+    total_proc++;
 
-    //check priority number
+    // if the currently executing pcb == initial pcb,
+    // set pcb_curr = newPCB
+    if(pcb_curr == pcb_init){
+        pcb_curr = newPCB;
+        printf("Process created successfully. Its PID is: %d with %s\n", newPCB->pid, priorityChar(newPCB->priority));
+        return SUCCESS;
+    }
+
+    // check priority number
+    // if the pcb_curr != initial pcb, put the new PCB into the correct ready_queue
     bool appendSuccess = false;
     switch (priority) {
         case 0: //high priority
@@ -183,6 +190,8 @@ int pcb_fork(){
     memcpy(newProcess, pcb_curr, sizeof(PCB));
     newProcess->pid = totalPID;
     totalPID++;
+    total_proc++;
+
     List* list = priorityList(pcb_curr->priority);
     List_prepend(list, newProcess);
     //TODO: I'm not sure if we can call pcb_next(), it's not in the specifications
@@ -194,36 +203,50 @@ int pcb_fork(){
 int pcb_kill(int pid){
     //search for the PCB corresponding to the pid, remove it from the list and free that pcb's memory
     COMPARATOR_FN pComparatorFn = &list_comparator;
-    PCB* PCB_kill = pcb_search(pid);
+
     if(pid == 0){
+        if(total_proc == 0){
+            printf("No more process except the initial process.\n");
+            printf("Terminating the simulation...\n");
+            termination_val = -1;
+            return EXIT_SIGNAL;
+        }
         printf("Cannot kill initial process.\n");
+        return EXIT_FAILURE;
     }
+
+    PCB* PCB_kill = pcb_search(pid);
     if(PCB_kill == NULL){
         printf("Process with PID #%d cannot be found.\n" ,pid);
-        return FAILURE;
+        return EXIT_FAILURE;
     }
     List* listItemRemove = priorityList(PCB_kill->priority);
     List_first(listItemRemove);
     List_search(listItemRemove, pComparatorFn, &pid);
     List_remove(listItemRemove);
     free(PCB_kill);
+    total_proc--;
     printf("PCB PID# %d removed.\n", pid);
     pcb_next();
     printf("The current active process: PID# %d, priority: %s(%d).\n",
            pcb_curr->pid, priorityChar(pcb_curr->pid), pcb_curr->priority);
-    return SUCCESS;
+    return EXIT_SUCCESS;
 }
 
 int pcb_exit() {
+    int curr_pid = pcb_curr->pid;
     if(pcb_curr == pcb_init){
         free(pcb_init);
         printf("Killing the initial process. Exiting the simulation...\n");
+        termination_val = -1;
         return EXIT_SIGNAL;
     }
     free(pcb_curr);
+    total_proc--;
     pcb_next();
-    printf("Current process killed. The current running process is: PID #%d\n",pcb_curr->pid);
-    return SUCCESS;
+    printf("Current process (pid: %d) is killed.\n", curr_pid);
+    printf("The new current running process is: PID #%d\n",pcb_curr->pid);
+    return EXIT_SUCCESS;
 }
 
 void list_pcb_free(void* pcb){
@@ -438,11 +461,14 @@ int pcb_create_semaphore(int sid, int init){
     }
 
     if(semaphore[sid] == NULL){
-        if(semaphore[sid] = (Semaphore*)malloc(sizeof(Semaphore)) == NULL){
+        semaphore[sid] = malloc(sizeof(Semaphore));
+        if(semaphore[sid] == NULL){
             printf("Failed to allocate memory for semaphore of the given sid: %d\n", sid);
             return FAILURE;
         }
+
         semaphore[sid]->val = init;
+        semaphore[sid]->plist = List_create();
     }else{
         printf("Semaphore with the given sid (%d) already exists. Try again.\n", sid);
         return FAILURE;
@@ -502,7 +528,7 @@ char* stateChar(enum pcb_states states){
 
 void pcb_procinfo(int pid){
     PCB* temp = pcb_search(pid);
-    printf("\nProcess PID#%d is in state: '%s' and is in queue %s(%d).",
+    printf("\nProcess PID#%d is in state: '%s' and is in queue %s(%d).\n",
            temp->pid, stateChar(temp->state), priorityChar(temp->priority), temp->priority);
     if(temp->waitReceiveState == NONE){
         printf("It is not in a wait/receive state.\n");
@@ -559,11 +585,15 @@ void pcb_totalinfo(){
     printf(".\n");
 
     //need to add semaphore
+    if(semaphore == NULL)
+        return;
     for (int i = 0; i < SEM_MAX; i++){
-        PCB* sem_blocked = List_first(semaphore[i]->plist);
-        while(sem_blocked != NULL){
-            printf("Process (pid: %d) is currently blocked by semaphore (sid: %d)\n", sem_blocked->pid, i);
-            sem_blocked = List_next(semaphore[i]->plist);
+        if(semaphore[i] != NULL){
+            PCB* sem_blocked = List_first(semaphore[i]->plist);
+            while(sem_blocked != NULL){
+                printf("Process (pid: %d) is currently blocked by semaphore (sid: %d)\n", sem_blocked->pid, i);
+                sem_blocked = List_next(semaphore[i]->plist);
+            }
         }
     }
 }
