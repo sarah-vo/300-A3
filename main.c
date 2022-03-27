@@ -148,7 +148,7 @@ int main(){
             printf("Invalid command: please enter the correct command.\n");
             printf("Enter 'H' for help.\n");
         }
-
+        printf("\n");
         if(termination_val == -1){
             return 0;
         }
