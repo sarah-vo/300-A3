@@ -37,11 +37,11 @@ int main(){
 
         if(command == 'C' || command == 'c'){ //create
             printf("Type in the PCB input: ");
-            char input;
+            int input;
             char* endptr;
+            int priority;
             //fflush(stdin);
-            scanf("%d",&input);
-            int priority = (int) input;
+            scanf("%d", &priority);
             if(priority == 0 || priority == 1 || priority == 2){
                 pcb_create(priority);
                 //pcb_totalinfo();

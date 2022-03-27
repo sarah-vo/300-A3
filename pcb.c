@@ -97,7 +97,7 @@ void pcb_next() {
 int pcb_initialize(){
     //initialize list
 
-
+    termination_val = 0;
     list_ready_high = List_create();
     list_ready_norm = List_create();
     list_ready_low = List_create();
@@ -127,7 +127,7 @@ int pcb_initialize(){
     totalPID++;
 
     pcb_curr = pcb_init;
-    printf("The initial process (pid: %d) has been created.\n");
+    printf("The initial process (pid: 0) has been created.\n");
     return SUCCESS;
 
 }
