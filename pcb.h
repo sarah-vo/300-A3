@@ -15,7 +15,7 @@ enum pcb_states {
     BLOCKED
 };
 
-enum wait_receive {
+enum list_wait {
     SEND,
     RECEIVE,
     NONE
@@ -27,13 +27,19 @@ enum pcb_priorities{
     LOW
 };
 
+typedef struct msgPCB_str msgPCB;
+struct msgPCB_str{
+    int PID;
+    char* msg;
+};
+
 typedef struct pcb_str PCB;
 struct pcb_str{
     int pid;                    // a process ID (pid)
     int priority;               // priority (0, 1, or 2)
     enum pcb_states state;      // state of the process (running, ready, blocked)
-    enum wait_receive waitReceiveState;
-    char* msg;                  // place to store any msgs another process "sends"s or "reply"s to this process
+    enum list_wait listWaitState;
+    msgPCB* msgPCBItem;                  // place to store any msgs another process "sends"s or "reply"s to this process
 };
 
 typedef struct Semaphore_s Semaphore;
