@@ -207,10 +207,7 @@ int pcb_kill(int pid){
     //search for the PCB corresponding to the pid, remove it from the list and free that pcb's memory
     COMPARATOR_FN pComparatorFn = &list_comparator;
 
-    PCB* PCB_kill = pcb_search(pid);
-    if(pid == pcb_curr->pid){
-        PCB_kill = pcb_curr;
-    }
+
 
     if(pid == 0){
         if(total_proc == 0){
@@ -222,7 +219,10 @@ int pcb_kill(int pid){
         printf("Cannot kill initial process.\n");
         return EXIT_FAILURE;
     }
-
+    PCB* PCB_kill = pcb_search(pid);
+    if(pid == pcb_curr->pid){
+        PCB_kill = pcb_curr;
+    }
     if(PCB_kill == NULL){
         printf("Process with PID #%d cannot be found.\n" ,pid);
         return EXIT_FAILURE;
@@ -364,173 +364,6 @@ int pcb_receive(){
     return SUCCESS;
 }
 
-//int pcb_reply(){
-//
-//}
-
-
-//int pcb_send(int pid, char* msg){
-//    COMPARATOR_FN pComparatorFn = &list_comparator;
-//    PCB* receiver;
-//
-//    // check if there's any process waiting for msg sent to it
-//    if(List_count(list_waiting_receive) != 0){
-//        if(List_search(list_waiting_receive, pComparatorFn, &pid) != NULL){
-//            receiver = (PCB *)List_trim(list_waiting_receive);
-//            strcpy(receiver->msg, msg);
-//            receiver->state = READY;
-//            List_prepend(priorityList(receiver->priority), receiver);
-//
-//            printf("The message has been successfully sent.\n");
-//            printf("Sender pid:\t%d with %s priority.\n", pcb_curr->pid, priorityChar(pcb_curr->priority));
-//            printf("Receiver pid:\t%d with %s priority.\n", pid, priorityChar(receiver->priority));
-//            printf("Message sent:\t%s\n", msg);
-//
-//            if(pcb_curr->pid != 0){
-//                pcb_curr->state = BLOCKED;
-//                List_prepend(list_waiting_send, pcb_curr);
-//                pcb_next();
-//            }
-//
-//            return SUCCESS;
-//        }
-//    }
-//
-//    // still need to be fixed  ************
-//    if(pid == pcb_curr->pid){   // if curr process sends msg to itself
-//        strcpy(receiver->msg, msg);
-//        pcb_curr->state = BLOCKED;
-//        List_prepend(list_waiting_send, pcb_curr);
-//
-//        printf("The message has been successfully sent.\n");
-//        printf("Sender pid:\t%d with %s priority.\n", pcb_curr->pid, priorityChar(pcb_curr->priority));
-//        printf("Receiver pid:\t%d with %s priority.\n", pid, priorityChar(receiver->priority));
-//        printf("Message sent:\t%s", msg);
-//
-//        pcb_next();
-//        return SUCCESS;
-//    }
-//
-//    // search all three ready queues
-//    // 1. high priority
-//    if(List_count(list_ready_high) != 0){
-//
-//    }
-//
-//    // 2. normal priority
-//    if(List_count(list_ready_norm) != 0){
-//        if(List_search(list_ready_norm, pComparatorFn, &pid) != NULL){
-//            receiver = List_trim(list_ready_norm);
-//            strcpy(receiver->msg, msg);
-//            receiver->state = READY;
-//            List_prepend(priorityList(receiver->priority), receiver);
-//
-//            printf("The message has been successfully sent.\n");
-//            printf("Sender pid:\t%d with %s priority.\n", pcb_curr->pid, priorityChar(pcb_curr->priority));
-//            printf("Receiver pid:\t%d with %s priority.\n", pid, priorityChar(receiver->priority));
-//            printf("Message sent:\t%s", msg);
-//
-//            if(pcb_curr->pid == 0){
-//                pcb_curr->state = BLOCKED;
-//                List_prepend(list_waiting_send, pcb_curr);
-//                pcb_next();
-//            }
-//            return SUCCESS;
-//        }
-//    }
-//
-//    // 3. low priority
-//    if(List_count(list_ready_low) != 0){
-//        if(List_search(list_ready_low, pComparatorFn, &pid) != NULL){
-//            receiver = List_trim(list_ready_low);
-//            strcpy(receiver->msg, msg);
-//            receiver->state = READY;
-//            List_prepend(priorityList(receiver->priority), receiver);
-//
-//            printf("The message has been successfully sent.\n");
-//            printf("Sender pid:\t%d with %s priority.\n", pcb_curr->pid, priorityChar(pcb_curr->priority));
-//            printf("Receiver pid:\t%d with %s priority.\n", pid, priorityChar(receiver->priority));
-//            printf("Message sent:\t%s", msg);
-//
-//            if(pcb_curr->pid == 0){
-//                pcb_curr->state = BLOCKED;
-//                List_prepend(list_waiting_send, pcb_curr);
-//                pcb_next();
-//            }
-//            return SUCCESS;
-//        }
-//    }
-//
-//    // no match:
-//    printf("Failed to send the message:\t'%s'.\n", msg);
-//    printf("No receiver (pid = %d)\n", pid);
-//    printf("Try again with a different pid.\n");
-//    return FAILURE;
-//}
-
-// Check if the currently executing process has received any messages
-//int pcb_receive(){
-//    if(pcb_curr->msg == NULL){
-//        printf("Current pcb (pid = %d, priority = %s) hasn't received any messages.\n", pcb_curr->pid, priorityChar(pcb_curr->priority));
-//
-//        if(pcb_curr->pid != 0){
-//            pcb_curr->state = BLOCKED;
-//            List_prepend(list_waiting_receive, pcb_curr);
-//
-//            pcb_next();
-//        }
-//
-//        printf("New curr pcb:\tpid = %d, priority = %s\n", pcb_curr->pid, priorityChar(pcb_curr->priority));
-//        return FAILURE;
-//    }else{
-//        printf("Current pcb (pid = %d, priority = %s) has successfully received the message.\n", pcb_curr->pid, priorityChar(pcb_curr->priority));
-//        printf("Message received:\t'%s'\n", pcb_curr->msg);
-//
-//        // reset the msg and partner_pid
-//        pcb_curr->msg = NULL;
-//
-//        return SUCCESS;
-//    }
-//}
-
-//int pcb_reply(int pid, char* msg){
-//    COMPARATOR_FN pComparatorFn = &list_comparator;
-//    PCB* receiver;
-//
-//    if(pid == 0){
-//        printf("The reply message has been successfully sent.\n");
-//        printf("Replier pid:\t%d with %s priority.\n", pcb_curr->pid, priorityChar(pcb_curr->priority));
-//        printf("Receiver pid:\t%d with %s priority.\n", pid, priorityChar(receiver->priority));
-//        printf("Reply sent:\t%s\n", msg);
-//        return SUCCESS;
-//    }
-//
-//    // check if there's any process waiting for msg sent to it
-//    if(List_count(list_waiting_send) != 0){
-//
-//        if(List_search(list_waiting_send, pComparatorFn, &pid) != NULL){
-//            receiver = List_trim(list_waiting_send);
-//            strcpy(receiver->msg, msg);
-//            receiver->state = READY;
-//            List_prepend(priorityList(receiver->priority), receiver);
-//
-//            printf("The reply message has been successfully sent.\n");
-//            printf("Replier pid:\t%d with %s priority.\n", pcb_curr->pid, priorityChar(pcb_curr->priority));
-//            printf("Receiver pid:\t%d with %s priority.\n", pid, priorityChar(receiver->priority));
-//            printf("Reply sent:\t%s", msg);
-//
-//            return SUCCESS;
-//        }
-//    }else{
-//        printf("There's no pcb waiting for replies.\n");
-//        return FAILURE;
-//    }
-//
-//    printf("Failed to find a send_blocked pcb with pid = %d.\n", pid);
-//    printf("Try another pid.\n");
-//
-//    return FAILURE;
-//}
 
 int pcb_create_semaphore(int sid, int init){
     if(sid < 0 || sid >= SEM_MAX){
