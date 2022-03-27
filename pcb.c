@@ -104,6 +104,7 @@ int pcb_initialize(){
     list_waiting_send = List_create();
     list_waiting_receive = List_create();
     list_msg_send = List_create();
+    termination_val = 0;
 
     if( list_ready_high == NULL ||
         list_ready_norm == NULL ||
@@ -149,6 +150,7 @@ int pcb_create(int priority){
 
     totalPID++;
     total_proc++;
+
 
     // if the currently executing pcb == initial pcb,
     // set pcb_curr = newPCB
@@ -235,8 +237,6 @@ int pcb_kill(int pid){
     total_proc--;
     printf("PCB PID# %d removed.\n", pid);
     pcb_next();
-    printf("The current active process: PID# %d, priority: %s(%d).\n",
-           pcb_curr->pid, priorityChar(pcb_curr->pid), pcb_curr->priority);
     return EXIT_SUCCESS;
 }
 
@@ -364,7 +364,43 @@ int pcb_receive(){
     return SUCCESS;
 }
 
+int pcb_reply(int pid, char* msg){
+    COMPARATOR_FN pComparatorFn = &list_comparator;
 
+    //search for the PCB we want to send msg to
+    PCB* receiver = pcb_search(pid);
+    if(receiver == NULL){
+        printf("Cannot find process.\n");
+        return FAILURE;
+    }
+
+    if(receiver->listWaitState == RECEIVE){
+        printf("PID chosen is in wait receive queue! Reply failed.\n");
+        return FAILURE;
+    }
+
+    msgPCB* item = malloc(sizeof(msgPCB));
+    item->msg = msg;
+    item->PID = pcb_curr->pid;
+    receiver->msgPCBItem = realloc(item, sizeof(msgPCB));
+    printf("\nMessage replied to PCB PID #%d. ", receiver->pid);
+
+    if(receiver->listWaitState == SEND){
+        receiver->state = READY;
+        List_prepend(priorityList(receiver->priority), receiver);
+        List_first(list_waiting_send);
+        if(List_search(list_waiting_send, pComparatorFn, &receiver->pid) == NULL){
+            printf("Error searching for the PCB in waiting send queue!\n");
+            return FAILURE;
+        }
+        List_remove(list_waiting_send);
+        printf("Its state is currently: RUNNING,");
+        printf("\n");
+    }
+
+    return SUCCESS;
+
+}
 int pcb_create_semaphore(int sid, int init){
     if(sid < 0 || sid >= SEM_MAX){
         printf("Invalid sid. The value sid will be from 0 to 4.\n");

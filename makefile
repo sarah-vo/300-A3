@@ -1,5 +1,5 @@
 all:
-	gcc -g main.c pcb.c list.o -o pcb
+	gcc -g main.c pcb.c pcb.h list.o -o pcb
 
 clean:
 	rm pcb
