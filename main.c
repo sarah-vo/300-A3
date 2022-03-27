@@ -20,7 +20,6 @@ void pcb_command_list(){
     printf("V: Semaphore V\n");
     printf("I: Procinfo\n");
     printf("T: Totalinfo\n");
-
 }
 
 int main(){
@@ -95,7 +94,23 @@ int main(){
             pcb_receive();
 
         }else if(command == 'Y'){
-            //pcb_reply();
+            char pid_input;
+            printf("Type in the PID#: ");
+            scanf("%s", &pid_input);
+            int PID = atoi(&pid_input);
+
+            char input[MAX_LEN];
+            printf("\n Type in the message: ");
+
+            scanf("%s", input);
+            char* msg = input;
+            msg[strcspn(msg,"\n")] = '\0';
+            int len = (int)strlen(msg);
+
+            char* pMessage = (char*)malloc(len + 1);
+            strcpy(pMessage, msg);
+            printf("%s", msg);
+            pcb_reply(PID, pMessage);
 
         }else if(command == 'N'){
             int sid;
