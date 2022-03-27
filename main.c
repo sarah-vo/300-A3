@@ -32,7 +32,7 @@ int main(){
     while(true){
         printf("Enter a command: \n");
         fflush(stdin);
-        scanf("%c", &command);
+        scanf(" %c", &command);
 
         if(command == 'C' || command == 'c'){ //create
             printf("Type in the PCB input: ");
