@@ -585,7 +585,7 @@ void pcb_totalinfo(){
     printf(".\n");
 
     PCB* pcb_waitingReceive = List_first(list_waiting_receive);
-    printf("Processes in waiting send list: ");
+    printf("Processes in waiting receive list: ");
     for(int i = 0; pcb_waitingReceive != NULL; i++){
         printf("%d ", pcb_waitingReceive->pid);
         pcb_waitingReceive = List_next(list_waiting_receive);
