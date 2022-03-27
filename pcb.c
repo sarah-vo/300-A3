@@ -207,6 +207,11 @@ int pcb_kill(int pid){
     //search for the PCB corresponding to the pid, remove it from the list and free that pcb's memory
     COMPARATOR_FN pComparatorFn = &list_comparator;
 
+    PCB* PCB_kill = pcb_search(pid);
+    if(pid == pcb_curr->pid){
+        PCB_kill = pcb_curr;
+    }
+
     if(pid == 0){
         if(total_proc == 0){
             printf("No more process except the initial process.\n");
@@ -218,7 +223,6 @@ int pcb_kill(int pid){
         return EXIT_FAILURE;
     }
 
-    PCB* PCB_kill = pcb_search(pid);
     if(PCB_kill == NULL){
         printf("Process with PID #%d cannot be found.\n" ,pid);
         return EXIT_FAILURE;
