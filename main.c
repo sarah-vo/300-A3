@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "pcb.h"
 #include "list.h"
@@ -106,15 +107,27 @@ int main(){
             pcb_quantum();
 
         }else if(command == 'S'){
+            int pid_input;
             printf("Type in the PID#: ");
-            char input;
-            //fflush(stdin);
-            scanf("%s", &input);
-            int PID = atoi(&input);
+            scanf("%s", &pid_input);
+            int PID = atoi(&pid_input);
+
+            char input[MAX_LEN];
             printf("\n Type in the message: ");
-            char *msg = NULL;
-            scanf("%s", msg);
-            pcb_send(PID, msg);
+
+            if (!fgets(input, (int)sizeof input, stdin)) {
+                printf("Reading message failed!");
+                exit(FAILURE);
+            }
+
+            char* msg = input;
+            msg[strcspn(msg,"\n")] = '\0';
+            int len = (int)strlen(msg);
+
+            char* pMessage = (char*)malloc(len + 1);
+            strcpy(pMessage, msg);
+            printf("%s", msg);
+            pcb_send(pid_input, pMessage);
 
         }else if(command == 'R'){
             pcb_receive();
@@ -143,7 +156,7 @@ int main(){
 //            printf("Enter 'H' for help.\n");
         }
     }
-   
-    
+
+
     return 0;
 }
