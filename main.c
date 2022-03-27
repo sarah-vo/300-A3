@@ -49,10 +49,10 @@ int main(){
                 printf("\nPriority value must be either 0, 1, or 2. Please try again.\n");
             }
         }
-        else if(command == 'F'){ //fork
+        else if(command == 'F' || command == 'f'){ //fork
             pcb_fork();
         }
-        else if(command == 'K'){ //kill
+        else if(command == 'K' || command == 'k'){ //kill
             printf("Type in the PID#: ");
             char input;
             //fflush(stdin);
@@ -61,16 +61,16 @@ int main(){
             pcb_kill(PID);
 
 
-        }else if(command == 'E'){//exit
+        }else if(command == 'E' || command == 'e'){//exit
             int exitCode = pcb_exit();
             if(exitCode == EXIT_SIGNAL){
                 break;
             }
 
-        }else if(command == 'Q'){
+        }else if(command == 'Q' || command == 'q'){
             pcb_quantum();
 
-        }else if(command == 'S'){
+        }else if(command == 'S' || command == 's'){
             char pid_input;
             printf("Type in the PID#: ");
             scanf("%s", &pid_input);
@@ -89,10 +89,10 @@ int main(){
             printf("%s", msg);
             pcb_send(PID, pMessage);
 
-        }else if(command == 'R'){
+        }else if(command == 'R' || command == 'r'){
             pcb_receive();
 
-        }else if(command == 'Y'){
+        }else if(command == 'Y' || command == 'y'){
             char pid_input;
             printf("Type in the PID#: ");
             scanf("%s", &pid_input);
@@ -111,7 +111,7 @@ int main(){
             printf("%s", msg);
             pcb_reply(PID, pMessage);
 
-        }else if(command == 'N'){
+        }else if(command == 'N' || command == 'n'){
             int sid;
             printf("Enter the sid (from 0 to 4): ");
             scanf("%d", &sid);
@@ -121,28 +121,28 @@ int main(){
             scanf("%d", &val);
             pcb_create_semaphore(sid, val);
 
-        }else if(command == 'P'){
+        }else if(command == 'P' || command == 'p'){
             int sid;
             printf("Enter the sid (from 0 to 4): ");
             scanf("%d", &sid);
             pcb_P(sid);
 
-        }else if(command == 'V'){
+        }else if(command == 'V' || command == 'v'){
             int sid;
             printf("Enter the sid (from 0 to 4): ");
             scanf("%d", &sid);
             pcb_V(sid);
 
-        }else if(command == 'I'){
+        }else if(command == 'I' || command == 'i'){
             printf("Enter the pid of the process you want to check: ");
             int pid;
             scanf("%d", &pid);
             pcb_procinfo(pid);
 
-        }else if(command == 'T'){
+        }else if(command == 'T' || command == 't'){
             pcb_totalinfo();
 
-        }else if(command == 'H'){
+        }else if(command == 'H' || command == 'h'){
             pcb_command_list();
         }else{
             printf("Invalid command: please enter the correct command.\n");
