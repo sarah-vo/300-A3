@@ -9,6 +9,8 @@
 
 #define EXIT_SIGNAL 482
 
+int termination_val = 0;
+
 enum pcb_states {
     RUNNING,
     READY,

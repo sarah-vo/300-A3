@@ -272,12 +272,12 @@ int pcb_quantum(){
     pcb_next();
     int nextPID = pcb_curr->pid;
     if(currPID == 0){
-        printf("Exiting from initial process. The current active process is PCB #%d", nextPID);
+        printf("Exiting from initial process.\nThe current active process is PCB #%d", nextPID);
 
     }
     else{
         List_prepend(priorityList(currPriority), preQuantumPCB);
-        printf("PCB #%d is put back into %s. The current active process is PCB #%d", currPID, priorityChar(currPriority), nextPID);
+        printf("PCB #%d is put back into %s. \nThe current active process is PCB #%d", currPID, priorityChar(currPriority), nextPID);
 
     }
     return SUCCESS;

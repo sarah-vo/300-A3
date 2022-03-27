@@ -54,15 +54,19 @@ void commands(){
 }
 
 void pcb_command_list(){
-    printf("C: Create");
-    printf("");
-    printf("");
-    printf("");
-    printf("");
-    printf("");
-    printf("");
-    printf("");
-    printf("");
+    printf("C: Create\n");
+    printf("F: Fork\n");
+    printf("K: Kill\n");
+    printf("E: Exit\n");
+    printf("Q: Quantum\n");
+    printf("S: Send\n");
+    printf("R: Receive\n");
+    printf("Y: Reply\n");
+    printf("N: New Semaphore\n");
+    printf("P: Semaphore P\n");
+    printf("V: Semaphore V\n");
+    printf("I: Procinfo\n");
+    printf("T: Totalinfo\n");
 
 }
 
@@ -141,16 +145,32 @@ int main(){
             //pcb_reply();
 
         }else if(command == 'N'){
-            //pcb_create_semaphore();
+            int sid;
+            printf("Enter the sid (from 0 to 4): ");
+            scanf("%d", &sid);
+
+            int val;
+            printf("Enter the semaphore value: ");
+            scanf("%d", &val);
+            pcb_create_semaphore(sid, val);
 
         }else if(command == 'P'){
-            //pcb_P();
+            int sid;
+            printf("Enter the sid (from 0 to 4): ");
+            scanf("%d", &sid);
+            pcb_P(sid);
 
         }else if(command == 'V'){
-            //pcb_V();
+            int sid;
+            printf("Enter the sid (from 0 to 4): ");
+            scanf("%d", &sid);
+            pcb_V(sid);
 
         }else if(command == 'I'){
-            pcb_totalinfo();
+            printf("Enter the pid of the process you want to check: ");
+            int pid;
+            scanf("%d", &pid);
+            pcb_procinfo(pid);
 
         }else if(command == 'T'){
             pcb_totalinfo();
@@ -158,8 +178,12 @@ int main(){
         }else if(command == 'H'){
             pcb_command_list();
         }else{
-//            printf("Invalid command: please enter the correct command.\n");
-//            printf("Enter 'H' for help.\n");
+            printf("Invalid command: please enter the correct command.\n");
+            printf("Enter 'H' for help.\n");
+        }
+
+        if(termination_val == -1){
+            return 0;
         }
     }
 
