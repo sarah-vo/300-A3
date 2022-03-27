@@ -54,6 +54,15 @@ void commands(){
 }
 
 void pcb_command_list(){
+    printf("C: Create");
+    printf("");
+    printf("");
+    printf("");
+    printf("");
+    printf("");
+    printf("");
+    printf("");
+    printf("");
 
 }
 
@@ -133,15 +142,16 @@ int main(){
             pcb_receive();
 
         }else if(command == 'Y'){
-            pcb_totalinfo();
+            //pcb_reply();
 
         }else if(command == 'N'){
-                
+            //pcb_create_semaphore();
+
         }else if(command == 'P'){
-            pcb_totalinfo();
+            //pcb_P();
 
         }else if(command == 'V'){
-            pcb_totalinfo();
+            //pcb_V();
 
         }else if(command == 'I'){
             pcb_totalinfo();
