@@ -470,7 +470,7 @@ int pcb_V(int sid){
         }
         List_prepend(priorityList(pcb_wake->priority), pcb_wake);   // wake up a process in pList and add it to the correct ready list
         printf("The semaphore (sid: #%d) has a value of %d which is <= 0\n", sid, semaphore[sid]->val);
-        printf("A process blocked by the semaphore (pid: #d, priority: %s) will be unblocked and be placed in the ready queue.\n", pcb_curr->pid, priorityChar(pcb_curr->priority));
+        printf("A process blocked by the semaphore (pid: %d, priority: %s) will be unblocked and be placed in the ready queue.\n", pcb_curr->pid, priorityChar(pcb_curr->priority));
     }
 }
 
