@@ -116,7 +116,7 @@ int main(){
             pcb_quantum();
 
         }else if(command == 'S'){
-            int pid_input;
+            char pid_input;
             printf("Type in the PID#: ");
             scanf("%s", &pid_input);
             int PID = atoi(&pid_input);
@@ -124,11 +124,7 @@ int main(){
             char input[MAX_LEN];
             printf("\n Type in the message: ");
 
-            if (!fgets(input, (int)sizeof input, stdin)) {
-                printf("Reading message failed!");
-                exit(FAILURE);
-            }
-
+            scanf("%s", input);
             char* msg = input;
             msg[strcspn(msg,"\n")] = '\0';
             int len = (int)strlen(msg);
@@ -136,7 +132,7 @@ int main(){
             char* pMessage = (char*)malloc(len + 1);
             strcpy(pMessage, msg);
             printf("%s", msg);
-            pcb_send(pid_input, pMessage);
+            pcb_send(PID, pMessage);
 
         }else if(command == 'R'){
             pcb_receive();

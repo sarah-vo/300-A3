@@ -257,6 +257,8 @@ int pcb_quantum(){
     return SUCCESS;
 }
 
+
+
 /**
  * @brief
  *
@@ -264,6 +266,8 @@ int pcb_quantum(){
  * @param msg (null-terminated msg string, 40 char max)
  * @return int
  */
+
+
 int pcb_send(int pid, char* msg){
     COMPARATOR_FN pComparatorFn = &list_comparator;
     PCB* receiver;
@@ -309,26 +313,7 @@ int pcb_send(int pid, char* msg){
     // search all three ready queues
     // 1. high priority
     if(List_count(list_ready_high) != 0){
-        if(List_search(list_ready_high, pComparatorFn, &pid) != NULL){
-            receiver = (PCB *)List_trim(list_ready_high);
-            strcpy(receiver->msg, msg);
-            receiver->state = READY;
-            List_prepend(priorityList(receiver->priority), receiver);
 
-            printf("The message has been successfully sent.\n");
-            printf("Sender pid:\t%d with %s priority.\n", pcb_curr->pid, priorityChar(pcb_curr->priority));
-            printf("Receiver pid:\t%d with %s priority.\n", pid, priorityChar(receiver->priority));
-            printf("Message sent:\t%s", msg);
-
-
-            if(pcb_curr->pid == 0){
-                pcb_curr->state = BLOCKED;
-                List_prepend(list_waiting_send, pcb_curr);
-                pcb_next();
-            }
-
-            return SUCCESS;
-        }
     }
 
     // 2. normal priority
